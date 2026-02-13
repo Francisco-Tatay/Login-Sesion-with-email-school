@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      login:
+        specifier: 'link:'
+        version: 'link:'
       vue:
         specifier: ^3.5.27
         version: 3.5.27
