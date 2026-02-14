@@ -1,9 +1,10 @@
-import mysql from "mysql2/promise";
+/* import mysql from "mysql2/promise";
 import dotenv from "dotenv";
+dotenv.config(); */
 
-dotenv.config();
+import { getPool } from "./DbSingleton.js";
 
-const pool = mysql.createPool({
+/* const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
@@ -12,8 +13,9 @@ const pool = mysql.createPool({
   connectionLimit: 4,
   waitForConnections: true,
   queueLimit: 0,
-});
+}); */
 
+const pool = getPool();
 const connectDB = async () => {
   try {
     const conn = await pool.getConnection();
@@ -23,6 +25,5 @@ const connectDB = async () => {
     console.error("❌ Error al conectar:", error.message);
   }
 };
-
 
 export { pool, connectDB };

@@ -1,4 +1,4 @@
-class User {
+export class User {
   #id;
   #name;
   #email;
@@ -22,11 +22,19 @@ class User {
   set email(email) {
     this.#email = email;
   }
-  get password(){
+  get password() {
     return this.#password;
   }
-  set password(password){
+  set password(password) {
     this.#password = password;
   }
-  
+    static generateNewPassword(length = 8) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-+";
+    let newPassword = "";
+    for (let i = 0; i < length; i++) {
+      newPassword += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return newPassword;
+  }
+
 }
