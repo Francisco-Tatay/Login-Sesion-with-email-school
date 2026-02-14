@@ -18,6 +18,10 @@
     "express": "^5.2.1",
     "helmet": "^8.1.0",
     "morgan": "^1.10.1",
+<<<<<<< Updated upstream
+=======
+    "mysql2": "^3.16.3",
+>>>>>>> Stashed changes
     "nodemailer": "^8.0.1",
     "nodemon": "^3.1.11"
   }
