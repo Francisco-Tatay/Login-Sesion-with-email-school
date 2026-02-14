@@ -13,15 +13,13 @@
   "license": "ISC",
   "packageManager": "pnpm@10.28.2",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
     "helmet": "^8.1.0",
     "morgan": "^1.10.1",
-<<<<<<< Updated upstream
-=======
     "mysql2": "^3.16.3",
->>>>>>> Stashed changes
     "nodemailer": "^8.0.1",
     "nodemon": "^3.1.11"
   }
