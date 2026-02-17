@@ -15,10 +15,9 @@ import { getPool } from "./DbSingleton.js";
   queueLimit: 0,
 }); */
 
-const pool = getPool();
 const connectDB = async () => {
   try {
-    const conn = await pool.getConnection();
+    const conn = await getPool().getConnection();
     console.log("✅ Conectado a la base de datos");
     return conn;
   } catch (error) {
@@ -26,4 +25,5 @@ const connectDB = async () => {
   }
 };
 
-export { pool, connectDB };
+export { connectDB };
+export { pool } from "./DbSingleton.js";

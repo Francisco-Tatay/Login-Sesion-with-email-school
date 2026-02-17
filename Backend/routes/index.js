@@ -13,4 +13,5 @@ router.post("/login", Login);
 router.post("/register", Register);
 router.post("/users/resetPassword", SendPasswordResetEmail);
 
+router.get("/test/test",(req,res)=>{res.send({message:"Test route works!"})});
 export default router;

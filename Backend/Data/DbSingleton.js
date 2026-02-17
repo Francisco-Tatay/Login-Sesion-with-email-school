@@ -13,7 +13,7 @@ const getPool = () => {
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
       port: process.env.DB_PORT || 3306,
-      connectionLimit: 4,
+      connectionLimit: 2,
       waitForConnections: true,
       queueLimit: 0,
     });
@@ -21,6 +21,8 @@ const getPool = () => {
 
   return poolInstance;
 };
+
+const pool = getPool();
 
 const connectDB = async () => {
   try {
@@ -33,4 +35,4 @@ const connectDB = async () => {
   }
 };
 
-export { getPool, connectDB };
+export { getPool, pool, connectDB };

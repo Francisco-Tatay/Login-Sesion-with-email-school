@@ -26,7 +26,9 @@ export const getAllUsers = async (req, res) => {
 export const Login = async (req, res) => {
   const { email, password } = req.body;
   try {
+    //    console.log(req.body);
     const [rows] = await pool.query("SELECT * FROM Users WHERE email=?", [email]);
+
     let passwordMatch = false;
     if (rows.length > 0) {
       let user = rows[0];
@@ -47,19 +49,38 @@ export const Login = async (req, res) => {
 };
 // for register new user with email and password
 export const Register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { email, password, role_id } = req.body;
+
   try {
-    let hashedPassword = bcrypt.hashSync(password, 10);
-    const result = await pool.query("INSERT INTO Users (name,email,password) VALUES (?,?,?)", [
-      name,
+    console.time("register");
+    //console.table(req.body);
+    const hashedPassword = await bcrypt.hash(password, 5);
+    const emailExists = await checkEmailExists(email);
+
+    if (emailExists) {
+      return res.status(409).json({ message: "El correo ya existe" });
+    }
+
+    const [result] = await pool.query("INSERT INTO Users (email, password, role_id) VALUES (?, ?, ?)", [
       email,
       hashedPassword,
+      role_id,
     ]);
-    res.json({ message: "Usuario registrado exitosamente", userId: result[0].insertId });
+
+    console.timeEnd("register");
+
+    res.json({
+      message: "Usuario registrado",
+      userId: result.insertId,
+    });
   } catch (error) {
-    return res.status(500).json({ message: "Error al registrar usuario" + error.message });
+    console.error(error);
+    res.status(500).json({
+      message: "Error al registrar: " + error.message,
+    });
   }
 };
+
 export const SendPasswordResetEmail = async (request, response) => {
   const { email } = request.body;
 
@@ -72,7 +93,7 @@ export const SendPasswordResetEmail = async (request, response) => {
     if (rows.length === 0) {
       return response.status(404).json({ message: "Usuario no encontrado" });
     }
-    // Generar nueva contraseña temporal
+    // Generar nueva contraseña
     const newPassword = User.generateNewPassword();
     const hashedPassword = bcrypt.hashSync(newPassword, 10);
     await pool.query("UPDATE Users SET password=? WHERE email=?", [hashedPassword, email]);
@@ -87,6 +108,16 @@ export const SendPasswordResetEmail = async (request, response) => {
   } catch (error) {
     console.error("Error en reset password:", error);
     return response.status(500).json({ message: "Error al restablecer contraseña" });
+  }
+};
+
+const checkEmailExists = async (email) => {
+  try {
+    const [rows] = await pool.query("SELECT email FROM Users WHERE email=?", [email]);
+    return rows.length > 0;
+  } catch (error) {
+    console.error("Error checking email existence:", error);
+    throw error;
   }
 };
 /* const { email } = request.body;
