@@ -5,13 +5,10 @@
 # En proyectos de equipo se suele subir, pero para prácticas escolares a veces se ignora.
 
 # --- Backend ---
-Backend/.env
 Backend/dist/
 Backend/build/
 
 # --- Frontend (Vite) ---
-Frontend/.env
-Frontend/.env.local
 Frontend/dist/
 Frontend/dist-ssr/
 Frontend/*.local
