@@ -3,7 +3,11 @@ import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import { User } from "../Model/User.js";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 dotenv.config();
+const secretKey="HolaMundoSecret";
+
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -33,12 +37,13 @@ export const Login = async (req, res) => {
     if (rows.length > 0) {
       let user = rows[0];
       passwordMatch = bcrypt.compareSync(password, user.password);
-      if (passwordMatch) {
-        user.password = null;
-        res.json({ message: "Login successful", user });
-      } else {
-        res.status(401).json({ message: "Usuario incorrecto o contraseña incorrecta" });
+      if(!passwordMatch){
+        return res.status(401).json({message:"password incorrect"});
       }
+      const tokenData={id:user.id,email:user.email,role_id:user.role_id};
+      const token=jwt.sign(tokenData,secretKey,{expiresIn:"1h"});
+      console.log(token);
+      return res.json({message:"Login successful",token});
     } else {
       res.status(404).json({ message: "Usuario no encontrado" });
     }
