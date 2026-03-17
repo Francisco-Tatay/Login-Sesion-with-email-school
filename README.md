@@ -1,6 +1,72 @@
-# 🔐 Login Sesión con Email Escolar
+# Login Sesion with Email School
 
-Una aplicación web moderna de autenticación y sesión de usuario usando correos electrónicos escolares. Construida con **Vue.js 3** en el frontend y **Express.js** en el backend, con seguridad integrada y mejores prácticas de desarrollo.
+Aplicacion full-stack con autenticacion, registro, recuperacion de contrasena y vista de prueba para eliminacion de usuario.  
+Frontend en Vue 3 + Vite, backend en Express + MySQL.
+
+## Que incluye el proyecto
+
+- Login con email y password
+- Registro de usuarios
+- Recuperacion de contrasena por email
+- Eliminacion de usuario por email (flujo de prueba conectado)
+- Landing principal con 3 opciones:
+  - Login
+  - Register
+  - Login Delete
+- Estilos responsive en vistas principales de autenticacion
+- Store con Pinia + capa de servicios HTTP
+
+## Stack Tecnologico
+
+### Frontend
+
+- Vue 3
+- Vite
+- Vue Router
+- Pinia
+- Axios
+- ESLint + Prettier + Oxlint
+
+### Backend
+
+- Node.js
+- Express
+- MySQL
+- bcrypt
+- jsonwebtoken
+- nodemailer
+- helmet, cors, morgan, dotenv
+
+---
+
+## Estructura General
+
+```txt
+Login-Sesion-with-email-school-/
+  Backend/
+    app.js
+    server.js
+    Controller/
+      UserController.js
+    routes/
+      index.js
+    Data/
+      Db.js
+  Frontend/
+    src/
+      App.vue
+      main.js
+      router/index.js
+      services/userService.js
+      stores/UseStore.js
+      components/
+        LandingPage.vue
+        LoginView.vue
+        LoginDeletePage.vue
+        Register/
+          Register_User.vue
+          SendEmail.vue
+```
 
 ## 🌟 Características
 

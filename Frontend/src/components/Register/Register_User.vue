@@ -39,8 +39,10 @@
           <span>o</span>
         </div>
 
-        <a class="link_login" href="/">¿Ya tienes cuenta? Inicia sesión</a>
+        <RouterLink class="link_login" to="/login">¿Ya tienes cuenta? Inicia sesión</RouterLink>
       </form>
+
+      <RouterLink to="/" class="go_home">Ver las 3 opciones principales</RouterLink>
     </div>
   </div>
 </template>
@@ -83,8 +85,8 @@ const handleRegister = async () => {
 
 .bg_blur {
   position: absolute;
-  width: 520px;
-  height: 520px;
+  width: clamp(250px, 44vw, 520px);
+  height: clamp(250px, 44vw, 520px);
   background: radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent 60%);
   filter: blur(30px);
   top: -200px;
@@ -238,6 +240,19 @@ input {
   text-decoration: underline;
 }
 
+.go_home {
+  display: block;
+  text-align: center;
+  margin-top: 12px;
+  color: #475569;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.go_home:hover {
+  text-decoration: underline;
+}
+
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -246,6 +261,37 @@ input {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .register_container {
+    padding: 18px;
+  }
+
+  .bg_blur {
+    top: -150px;
+    right: -130px;
+  }
+}
+
+@media (max-width: 480px) {
+  .register_container {
+    padding: 14px;
+  }
+
+  .card {
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  input,
+  .primary_btn {
+    font-size: 13px;
   }
 }
 </style>

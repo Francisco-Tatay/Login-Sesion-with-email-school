@@ -60,7 +60,10 @@ async function handleLogin() {
       <RouterLink to="/register" class="link"> Ir al registro </RouterLink>
     </div>
     <div class="links">
-      <RouterLink to="/SendEmail" class="link"> ¿Olvidaste tu contraseña? </RouterLink>
+      <RouterLink to="/send-email" class="link"> ¿Olvidaste tu contraseña? </RouterLink>
+    </div>
+    <div class="links">
+      <RouterLink to="/" class="link"> Ver las 3 opciones principales </RouterLink>
     </div>
   </div>
 </template>
@@ -80,8 +83,8 @@ async function handleLogin() {
 
 .bg_blur {
   position: absolute;
-  width: 520px;
-  height: 520px;
+  width: clamp(250px, 44vw, 520px);
+  height: clamp(250px, 44vw, 520px);
   background: radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent 60%);
   filter: blur(30px);
   top: -200px;
@@ -211,5 +214,36 @@ input {
 
 .link:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    padding: 18px;
+  }
+
+  .bg_blur {
+    top: -150px;
+    right: -130px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 14px;
+  }
+
+  .card {
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  input,
+  .primary_btn {
+    font-size: 13px;
+  }
 }
 </style>

@@ -5,8 +5,7 @@ import { User } from "../Model/User.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 dotenv.config();
-const secretKey="HolaMundoSecret";
-
+const secretKey = "HolaMundoSecret";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -37,13 +36,13 @@ export const Login = async (req, res) => {
     if (rows.length > 0) {
       let user = rows[0];
       passwordMatch = bcrypt.compareSync(password, user.password);
-      if(!passwordMatch){
-        return res.status(401).json({message:"password incorrect"});
+      if (!passwordMatch) {
+        return res.status(401).json({ message: "password incorrect" });
       }
-      const tokenData={id:user.id,email:user.email,role_id:user.role_id};
-      const token=jwt.sign(tokenData,secretKey,{expiresIn:"1h"});
+      const tokenData = { id: user.id, email: user.email, role_id: user.role_id };
+      const token = jwt.sign(tokenData, secretKey, { expiresIn: "1h" });
       console.log(token);
-      return res.json({message:"Login successful",token});
+      return res.json({ message: "Login successful", token });
     } else {
       res.status(404).json({ message: "Usuario no encontrado" });
     }
@@ -125,6 +124,29 @@ const checkEmailExists = async (email) => {
     throw error;
   }
 };
+
+export const deleteUser = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email es requerido" });
+  }
+
+  try {
+    const emailCheck = await checkEmailExists(email);
+
+    if (!emailCheck) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    await pool.query("DELETE FROM Users WHERE email=?", [email]);
+    return res.json({ message: "Usuario eliminado" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return res.status(500).json({ message: "Error al eliminar usuario" });
+  }
+};
+
 /* const { email } = request.body;
 
 await transporter.sendMail({

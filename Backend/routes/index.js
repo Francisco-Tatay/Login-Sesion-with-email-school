@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllUsers, Login, Register, SendPasswordResetEmail } from "../Controller/UserController.js";
+import { deleteUser, getAllUsers, Login, Register, SendPasswordResetEmail } from "../Controller/UserController.js";
 import { verificationToken } from "../middlewares/verificationToken.js";
 
 const router = Router();
@@ -13,6 +13,9 @@ router.get("/users/all", getAllUsers);
 router.post("/login", Login);
 router.post("/register", Register);
 router.post("/users/resetPassword", SendPasswordResetEmail);
+router.delete("/users/delete", deleteUser);
+
+
 
 router.get("/test/test",(req,res)=>{res.send({message:"Test route works!"})});
 export default router;

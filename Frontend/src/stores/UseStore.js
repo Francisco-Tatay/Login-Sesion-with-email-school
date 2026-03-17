@@ -5,6 +5,7 @@ import {
   addUser as addUserApi,
   SendPasswordEmail as sendPasswordEmailApi,
   loginUser,
+  deleteUser,
 } from "@/services/userService";
 
 export const useUserStore = defineStore("user", {
@@ -53,18 +54,30 @@ export const useUserStore = defineStore("user", {
         this.loading = false;
       }
     },
-    async loginUser(credentials){
-      this.loading=true;
-      try{
+    async loginUser(credentials) {
+      this.loading = true;
+      try {
         console.log(credentials);
         const { data } = await loginUser(credentials);
         return data;
-      }catch(error){
+      } catch (error) {
+        console.error(error);
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+    async deleteUser(email) {
+      this.loading = true;
+      try {
+        const { data } = await deleteUser(email);
+        return data;
+      } catch (error) {
         console.error(error);
         throw error;
       }finally{
         this.loading=false;
       }
-    }
+    },
   },
 });

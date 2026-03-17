@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useUserStore } from "@/stores/UseStore";
-document.title="Send Password"
+document.title = "Send Password";
 const email = ref("");
 const loading = ref(false);
 
@@ -46,8 +46,9 @@ const sendEmail = async () => {
       >
 
       <div class="links">
-        <a class="link" href="/">Volver al inicio de sesión</a>
-        <a class="link" href="/register">¿No tienes cuenta? Regístrate</a>
+        <RouterLink class="link" to="/login">Volver al inicio de sesión</RouterLink>
+        <RouterLink class="link" to="/register">¿No tienes cuenta? Regístrate</RouterLink>
+        <RouterLink class="link muted" to="/">Ver las 3 opciones principales</RouterLink>
       </div>
     </div>
   </div>
@@ -62,12 +63,14 @@ const sendEmail = async () => {
     radial-gradient(900px 400px at 10% -10%, rgba(59, 130, 246, 0.18), transparent 60%),
     linear-gradient(135deg, #eef2ff, #f8fafc);
   padding: 28px;
+  position: relative;
+  overflow: hidden;
 }
 
 .bg_blur {
   position: absolute;
-  width: 520px;
-  height: 520px;
+  width: clamp(250px, 44vw, 520px);
+  height: clamp(250px, 44vw, 520px);
   background: radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent 60%);
   filter: blur(30px);
   top: -200px;
@@ -186,5 +189,40 @@ input {
 
 .link:hover {
   text-decoration: underline;
+}
+
+.link.muted {
+  color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .send_container {
+    padding: 18px;
+  }
+
+  .bg_blur {
+    top: -150px;
+    right: -130px;
+  }
+}
+
+@media (max-width: 480px) {
+  .send_container {
+    padding: 14px;
+  }
+
+  .card {
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  input,
+  .primary_btn {
+    font-size: 13px;
+  }
 }
 </style>
