@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-
+import DashboardUsers from "@/components/DashBoard/DashboardUsers.vue";
 import LandingPage from "@/components/LandingPage.vue";
 import LoginView from "@/components/LoginView.vue";
 import Register_User from "@/components/Register/Register_User.vue";
@@ -37,6 +37,15 @@ const routes = [
   {
     path: "/SendEmail",
     redirect: "/send-email",
+  },
+  {
+    path: "/dashboard",
+    name: "dashboard",
+    component: DashboardUsers,
+  },
+  {
+    path: "/Dashboard",
+    redirect: "/dashboard",
   },
 ];
 const router = createRouter({

@@ -20,6 +20,12 @@ const options = [
     to: "/login/delete",
     badge: "Testing",
   },
+  {
+    title:"Dashboard",
+    description:"Vista previa del dashboard, sin proteccion de rutas ni datos reales.",
+    to:"/dashboard",
+    badge:"Dashboard"
+  }
 ];
 </script>
 

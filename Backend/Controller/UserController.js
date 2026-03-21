@@ -4,6 +4,7 @@ import nodemailer from "nodemailer";
 import { User } from "../Model/User.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 dotenv.config();
 const secretKey = "HolaMundoSecret";
 
@@ -30,7 +31,9 @@ export const Login = async (req, res) => {
   const { email, password } = req.body;
   try {
     //    console.log(req.body);
-    const [rows] = await pool.query("SELECT * FROM Users WHERE email=?", [email]);
+    const [rows] = await pool.query("SELECT * FROM Users WHERE email=?", [
+      email,
+    ]);
 
     let passwordMatch = false;
     if (rows.length > 0) {
@@ -39,7 +42,11 @@ export const Login = async (req, res) => {
       if (!passwordMatch) {
         return res.status(401).json({ message: "password incorrect" });
       }
-      const tokenData = { id: user.id, email: user.email, role_id: user.role_id };
+      const tokenData = {
+        id: user.id,
+        email: user.email,
+        role_id: user.role_id,
+      };
       const token = jwt.sign(tokenData, secretKey, { expiresIn: "1h" });
       console.log(token);
       return res.json({ message: "Login successful", token });
@@ -48,7 +55,9 @@ export const Login = async (req, res) => {
     }
   } catch (error) {
     console.error("error " + error.message);
-    return res.status(500).json({ message: "Error al iniciar sesión" + error.message });
+    return res
+      .status(500)
+      .json({ message: "Error al iniciar sesión" + error.message });
   }
 };
 // for register new user with email and password
@@ -65,11 +74,10 @@ export const Register = async (req, res) => {
       return res.status(409).json({ message: "El correo ya existe" });
     }
 
-    const [result] = await pool.query("INSERT INTO Users (email, password, role_id) VALUES (?, ?, ?)", [
-      email,
-      hashedPassword,
-      role_id,
-    ]);
+    const [result] = await pool.query(
+      "INSERT INTO Users (email, password, role_id) VALUES (?, ?, ?)",
+      [email, hashedPassword, role_id]
+    );
 
     console.timeEnd("register");
 
@@ -93,14 +101,19 @@ export const SendPasswordResetEmail = async (request, response) => {
   }
 
   try {
-    const [rows] = await pool.query("SELECT email FROM Users WHERE email=?", [email]);
+    const [rows] = await pool.query("SELECT email FROM Users WHERE email=?", [
+      email,
+    ]);
     if (rows.length === 0) {
       return response.status(404).json({ message: "Usuario no encontrado" });
     }
     // Generar nueva contraseña
     const newPassword = User.generateNewPassword();
     const hashedPassword = bcrypt.hashSync(newPassword, 10);
-    await pool.query("UPDATE Users SET password=? WHERE email=?", [hashedPassword, email]);
+    await pool.query("UPDATE Users SET password=? WHERE email=?", [
+      hashedPassword,
+      email,
+    ]);
     await transporter.sendMail({
       from: "pacotorrestatay8@gmail.com",
       to: email,
@@ -111,13 +124,17 @@ export const SendPasswordResetEmail = async (request, response) => {
     return response.json({ message: "Correo enviado" });
   } catch (error) {
     console.error("Error en reset password:", error);
-    return response.status(500).json({ message: "Error al restablecer contraseña" });
+    return response
+      .status(500)
+      .json({ message: "Error al restablecer contraseña" });
   }
 };
 
 const checkEmailExists = async (email) => {
   try {
-    const [rows] = await pool.query("SELECT email FROM Users WHERE email=?", [email]);
+    const [rows] = await pool.query("SELECT email FROM Users WHERE email=?", [
+      email,
+    ]);
     return rows.length > 0;
   } catch (error) {
     console.error("Error checking email existence:", error);
@@ -147,12 +164,38 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-/* const { email } = request.body;
+export const requestPasswordReset = async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: "Email requerido" });
 
-await transporter.sendMail({
-  from: "pacotorrestatay8@gmail.com",
-  to: email,
-  subject: "Prueba",
-  text: "Hola desde NodeMailer",
-});
- */
+  const [rows] = await pool.query("SELECT id FROM Users WHERE email = ?", [
+    email,
+  ]);
+
+  // Respuesta genérica para evitar enumeración
+  if (rows.length === 0) {
+    return res.json({
+      message: "Si el correo existe, te enviamos instrucciones",
+    });
+  }
+
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+  await pool.query(
+    "INSERT INTO PasswordResetTokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)",
+    [rows[0].id, tokenHash, expiresAt]
+  );
+
+  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
+  await transporter.sendMail({
+    to: email,
+    subject: "Restablecer contraseña",
+    text: `Restablece tu contraseña aquí: ${resetLink}`,
+  });
+
+  return res.json({
+    message: "Si el correo existe, te enviamos instrucciones",
+  });
+};

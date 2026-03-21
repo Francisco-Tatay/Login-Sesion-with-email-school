@@ -25,7 +25,7 @@ Frontend/*.local
 # --- Sistema Operativo ---
 .DS_Store
 Thumbs.db
-
+**/node_modules
 # --- Logs ---
 **/logs
 *.log
