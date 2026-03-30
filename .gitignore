@@ -7,7 +7,7 @@
 # --- Backend ---
 Backend/dist/
 Backend/build/
-
+**node_modules/
 # --- Frontend (Vite) ---
 Frontend/dist/
 Frontend/dist-ssr/
