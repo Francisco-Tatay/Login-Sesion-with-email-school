@@ -1,5 +1,5 @@
-import mysql from "mysql2/promise";
-import dotenv from "dotenv";
+import mysql from 'mysql2/promise';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -13,7 +13,7 @@ const getPool = () => {
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
       port: process.env.DB_PORT || 3306,
-      connectionLimit: 2,
+      connectionLimit: Number(process.env.DB_POOL_LIMIT || 10),
       waitForConnections: true,
       queueLimit: 0,
     });
@@ -27,10 +27,10 @@ const pool = getPool();
 const connectDB = async () => {
   try {
     const conn = await getPool().getConnection();
-    console.log("Connected to the database");
+    console.log('Connected to the database');
     return conn;
   } catch (error) {
-    console.error("Error connecting:", error.message);
+    console.error('Error connecting:', error.message);
     return null;
   }
 };
