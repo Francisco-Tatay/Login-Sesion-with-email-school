@@ -1,7 +1,7 @@
 import { pool } from '../Data/Db.js';
 import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
-import { User } from '../Model/User.js';
+import { User } from '../src/Model/User.js';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
