@@ -1,0 +1,52 @@
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
+      - backend
+  frontend:
+    build: ./Frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./Frontend/src:/app/src
+      - ./Frontend/index.html:/app/index.html
+    depends_on:
+      - backend
+
+  db:
+    image: mariadb:11
+    mem_limit: 512m
+    environment:
+      MYSQL_ROOT_PASSWORD: test01
+      MYSQL_DATABASE: loginEmailSession
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -u root -ptest01 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./Backend
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASS=test01
+      - DB_NAME=loginEmailSession
+      - JWT_SECRET=change_this_secret_key
+    depends_on:
+      - db
+    volumes:
+      - ./Backend/src:/app/src
+
+volumes:
+  mysql_data:
