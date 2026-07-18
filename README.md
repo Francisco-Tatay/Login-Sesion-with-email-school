@@ -1,4 +1,4 @@
-# Login Sesion with Email School
+# Login Sesion with Email School — v1
 
 Aplicacion full-stack con autenticacion, registro, recuperacion de contrasena y vista de prueba para eliminacion de usuario.  
 Frontend en Vue 3 + Vite, backend en Express + MySQL.
