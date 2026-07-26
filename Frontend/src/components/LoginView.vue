@@ -1,14 +1,14 @@
 <script setup>
 import { useUserStore } from "@/stores/UseStore";
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { PhLockKey, PhLockSimple, PhEye, PhEyeSlash, PhCheckCircle, PhXCircle, PhWarning, PhCheck } from "@phosphor-icons/vue";
 
-document.title = "Login | Tu Aplicación";
+document.title = "Login | School Login";
 
 const router = useRouter();
 const store = useUserStore();
 
-// Estados del formulario
 const email = ref("");
 const password = ref("");
 const showPassword = ref(false);
@@ -17,17 +17,14 @@ const isLoading = ref(false);
 const error = ref("");
 const response = ref("");
 
-// Validaciones en tiempo real
 const isEmailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value));
 const isPasswordValid = computed(() => password.value.length >= 6);
 const isFormValid = computed(() => isEmailValid.value && isPasswordValid.value);
 
-// Toggle visibilidad de contraseña
 const togglePassword = () => {
   showPassword.value = !showPassword.value;
 };
 
-// Manejo del login con mejoras
 async function handleLogin() {
   if (!isFormValid.value) {
     if (isEmailValid.value) {
@@ -43,41 +40,41 @@ async function handleLogin() {
   isLoading.value = true;
 
   try {
-    const data = await store.loginUser({ 
-      email: email.value.trim(), 
+    const data = await store.loginUser({
+      email: email.value.trim(),
       password: password.value,
-      remember: rememberMe.value 
+      remember: rememberMe.value,
     });
-    
+
     response.value = data?.message || "¡Inicio de sesión exitoso!";
-    
-    // Guardar preferencia de "recordarme"
+
     if (rememberMe.value) {
       localStorage.setItem("rememberedEmail", email.value);
     } else {
       localStorage.removeItem("rememberedEmail");
     }
-    
-    // Redirección después de éxito
+
+    if (data?.token) {
+      localStorage.setItem("token", data.token);
+    }
+
     setTimeout(() => {
       router.push(data?.redirect || "/dashboard");
     }, 1200);
-    
   } catch (err) {
     error.value = err.message || "Credenciales incorrectas. Intenta nuevamente.";
-    // Efecto de shake en el formulario (opcional con refs)
   } finally {
     isLoading.value = false;
   }
 }
 
-// Cargar email guardado al montar
-if (localStorage.getItem("rememberedEmail")) {
-  email.value = localStorage.getItem("rememberedEmail");
-  rememberMe.value = true;
-}
+onMounted(() => {
+  if (localStorage.getItem("rememberedEmail")) {
+    email.value = localStorage.getItem("rememberedEmail");
+    rememberMe.value = true;
+  }
+});
 
-// Permitir login con Enter
 const handleKeydown = (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -85,23 +82,22 @@ const handleKeydown = (e) => {
   }
 };
 </script>
+
 <template>
   <div class="login-container">
-    <!-- Efectos de fondo animados -->
     <div class="bg_blur blur-1"></div>
     <div class="bg_blur blur-2"></div>
     <div class="bg_particles"></div>
 
-    <form 
-      class="card" 
+    <form
+      class="card"
       @submit.prevent="handleLogin"
       @keydown="handleKeydown"
       aria-labelledby="login-title"
     >
-      <!-- Header con animación -->
       <div class="card_header">
         <div class="logo_dot">
-          <span class="logo-icon">🔐</span>
+          <PhLockKey :size="24" weight="bold" />
         </div>
         <div>
           <h2 id="login-title">Iniciar sesión</h2>
@@ -109,11 +105,12 @@ const handleKeydown = (e) => {
         </div>
       </div>
 
-      <!-- Campo Email -->
       <div class="form-group" :class="{ 'has-error': error && !isEmailValid }">
         <label for="email">
           <span>Correo electrónico</span>
-          <span v-if="email && !isEmailValid" class="validation-icon" aria-hidden="true">⚠️</span>
+          <span v-if="email && !isEmailValid" class="validation-icon">
+          <PhWarning :size="14" weight="fill" />
+        </span>
         </label>
         <div class="input_wrap">
           <input
@@ -127,15 +124,18 @@ const handleKeydown = (e) => {
             aria-required="true"
             :aria-invalid="!!(email && !isEmailValid)"
           />
-          <span v-if="isEmailValid" class="success-icon" aria-hidden="true">✓</span>
+          <span v-if="isEmailValid" class="success-icon">
+            <PhCheck :size="16" weight="bold" />
+          </span>
         </div>
       </div>
 
-      <!-- Campo Password con toggle -->
       <div class="form-group" :class="{ 'has-error': error && !isPasswordValid }">
         <label for="password">
           <span>Contraseña</span>
-          <span v-if="password && !isPasswordValid" class="validation-icon" aria-hidden="true">⚠️</span>
+          <span v-if="password && !isPasswordValid" class="validation-icon">
+          <PhWarning :size="14" weight="fill" />
+        </span>
         </label>
         <div class="input-wrap-password">
           <div class="input_wrap">
@@ -148,26 +148,26 @@ const handleKeydown = (e) => {
               required
               :autocomplete="showPassword ? 'off' : 'current-password'"
               minlength="6"
-              aria-required="true" 
+              aria-required="true"
             />
           </div>
-          <button 
-            type="button" 
+          <button
+            type="button"
             class="toggle-password"
             @click="togglePassword"
             :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
             tabindex="-1"
           >
-            {{ showPassword ? '🙈' : '👁️' }}
+            <PhEye v-if="!showPassword" :size="20" />
+            <PhEyeSlash v-else :size="20" />
           </button>
         </div>
       </div>
 
-      <!-- Recordarme y Forgot password -->
       <div class="form-options">
         <label class="checkbox-wrapper">
-          <input 
-            type="checkbox" 
+          <input
+            type="checkbox"
             v-model="rememberMe"
             class="custom-checkbox"
           />
@@ -179,9 +179,8 @@ const handleKeydown = (e) => {
         </RouterLink>
       </div>
 
-      <!-- Botón de submit con loader -->
-      <button 
-        type="submit" 
+      <button
+        type="submit"
         class="primary_btn"
         :disabled="isLoading || !isFormValid"
         :class="{ 'loading': isLoading, 'invalid-form': !isFormValid }"
@@ -193,22 +192,20 @@ const handleKeydown = (e) => {
         <span v-else class="loader"></span>
       </button>
 
-      <!-- Mensajes de estado -->
       <transition name="fade-slide">
         <p v-if="error" class="message error" role="alert">
-          <span class="message-icon" aria-hidden="true">❌</span>
+          <PhXCircle :size="16" weight="fill" />
           {{ error }}
         </p>
       </transition>
       <transition name="fade-slide">
         <output v-if="response" class="message success" aria-live="polite">
-          <span class="message-icon" aria-hidden="true">✅</span>
+          <PhCheckCircle :size="16" weight="fill" />
           {{ response }}
         </output>
       </transition>
     </form>
 
-    <!-- Links adicionales -->
     <div class="links-container">
       <RouterLink to="/register" class="link primary">
         Crear una cuenta nueva
@@ -218,35 +215,14 @@ const handleKeydown = (e) => {
       </RouterLink>
     </div>
 
-    <!-- Footer decorativo -->
     <div class="login-footer">
-      <p>🔒 Tu información está protegida con encriptación SSL</p>
+      <PhLockSimple :size="14" weight="bold" />
+      <span>Tu información está protegida con encriptación SSL</span>
     </div>
   </div>
 </template>
-<style scoped>
-/* ===== VARIABLES CSS ===== */
-:root {
-  --primary: #3b82f6;
-  --primary-dark: #2563eb;
-  --primary-light: #60a5fa;
-  --success: #10b981;
-  --error: #ef4444;
-  --warning: #f59e0b;
-  --text-primary: #0f172a;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --border: #e2e8f0;
-  --shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 10px 25px -5px rgb(0 0 0 / 0.15);
-  --shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-  --radius: 16px;
-  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
-/* ===== CONTENEDOR PRINCIPAL ===== */
+<style scoped>
 .login-container {
   min-height: 100vh;
   display: grid;
@@ -260,7 +236,6 @@ const handleKeydown = (e) => {
   overflow: hidden;
 }
 
-/* ===== EFECTOS DE FONDO ANIMADOS ===== */
 .bg_blur {
   position: absolute;
   border-radius: 50%;
@@ -296,11 +271,10 @@ const handleKeydown = (e) => {
   75% { transform: translate(10px, 10px) scale(1.02); }
 }
 
-/* Partículas sutiles de fondo */
 .bg_particles {
   position: absolute;
   inset: 0;
-  background-image: 
+  background-image:
     radial-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
     radial-gradient(rgba(139, 92, 246, 0.08) 1px, transparent 1px);
   background-size: 50px 50px, 35px 35px;
@@ -316,16 +290,16 @@ const handleKeydown = (e) => {
   100% { background-position: 50px 50px, 60px 60px; }
 }
 
-/* ===== TARJETA PRINCIPAL ===== */
 .card {
   width: 100%;
   max-width: 440px;
   background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: var(--radius);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-xl);
   padding: 32px;
-  box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(20px);
+  box-shadow:
+    inset -2px -2px 8px rgba(0, 0, 0, 0.04),
+    var(--shadow-lg);
   position: relative;
   z-index: 1;
   animation: cardEntrance 0.5s ease-out;
@@ -342,35 +316,30 @@ const handleKeydown = (e) => {
   }
 }
 
-/* ===== HEADER ===== */
 .card_header {
   display: flex;
   align-items: center;
   gap: 16px;
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .logo_dot {
   width: 52px;
   height: 52px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   display: grid;
   place-items: center;
-  box-shadow: 0 12px 24px rgba(59, 130, 246, 0.3);
+  box-shadow: var(--shadow-primary);
   animation: pulse 3s ease-in-out infinite;
   flex-shrink: 0;
-}
-
-.logo-icon {
-  font-size: 24px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  color: white;
 }
 
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 12px 24px rgba(59, 130, 246, 0.3); }
+  0%, 100% { box-shadow: var(--shadow-primary); }
   50% { box-shadow: 0 12px 32px rgba(124, 58, 237, 0.45); }
 }
 
@@ -378,18 +347,17 @@ const handleKeydown = (e) => {
   margin: 0 0 4px;
   font-size: 24px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   letter-spacing: -0.025em;
 }
 
 .card_header p {
   margin: 0;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 1.5;
 }
 
-/* ===== FORMULARIO ===== */
 .form-group {
   margin-bottom: 18px;
   position: relative;
@@ -402,12 +370,12 @@ const handleKeydown = (e) => {
   margin-bottom: 8px;
   font-weight: 600;
   font-size: 13px;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   letter-spacing: 0.01em;
 }
 
 .validation-icon {
-  font-size: 14px;
+  color: var(--color-warning);
   animation: bounce 0.3s ease;
 }
 
@@ -416,20 +384,19 @@ const handleKeydown = (e) => {
   50% { transform: scale(1.2); }
 }
 
-/* ===== INPUTS ===== */
 .input_wrap {
   position: relative;
-  background: var(--bg-secondary);
-  border: 2px solid var(--border);
-  border-radius: 12px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 2px;
-  transition: var(--transition);
+  transition: var(--transition-base);
 }
 
 .input_wrap:focus-within {
-  border-color: var(--primary-light);
+  border-color: var(--color-primary-light);
   box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
-  background: #fff;
+  background: var(--color-bg-primary);
 }
 
 .input_wrap input {
@@ -438,23 +405,23 @@ const handleKeydown = (e) => {
   border: none;
   background: transparent;
   outline: none;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   font-size: 15px;
   font-family: inherit;
-  transition: var(--transition);
+  transition: var(--transition-base);
 }
 
 .input_wrap input::placeholder {
-  color: var(--text-muted);
+  color: var(--color-text-muted);
   opacity: 1;
 }
 
 .input_wrap input.valid {
-  color: var(--success);
+  color: var(--color-success);
 }
 
 .input_wrap input.invalid {
-  color: var(--error);
+  color: var(--color-destructive);
   animation: shake 0.4s ease;
 }
 
@@ -469,9 +436,7 @@ const handleKeydown = (e) => {
   right: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--success);
-  font-weight: bold;
-  font-size: 16px;
+  color: var(--color-success);
   pointer-events: none;
   animation: fadeIn 0.2s ease;
 }
@@ -481,7 +446,6 @@ const handleKeydown = (e) => {
   to { opacity: 1; transform: translateY(-50%) scale(1); }
 }
 
-/* ===== PASSWORD CON TOGGLE ===== */
 .input-wrap-password {
   position: relative;
   display: flex;
@@ -500,12 +464,11 @@ const handleKeydown = (e) => {
   transform: translateY(-50%);
   background: none;
   border: none;
-  font-size: 18px;
   cursor: pointer;
   padding: 8px;
-  border-radius: 8px;
-  color: var(--text-secondary);
-  transition: var(--transition);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  transition: var(--transition-base);
   display: grid;
   place-items: center;
   min-width: 36px;
@@ -514,66 +477,14 @@ const handleKeydown = (e) => {
 
 .toggle-password:hover {
   background: rgba(59, 130, 246, 0.1);
-  color: var(--primary);
+  color: var(--color-primary-light);
 }
 
-.toggle-password:focus {
-  outline: 2px solid var(--primary-light);
+.toggle-password:focus-visible {
+  outline: 2px solid var(--color-primary-light);
   outline-offset: 2px;
 }
 
-/* ===== BARRA DE FORTALEZA ===== */
-.password-strength {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-  padding-left: 4px;
-}
-
-.strength-bar {
-  flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--border);
-  overflow: hidden;
-  position: relative;
-}
-
-.strength-bar::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  border-radius: 2px;
-  transition: var(--transition);
-}
-
-.strength-bar.weak::after {
-  width: 33%;
-  background: var(--error);
-}
-
-.strength-bar.medium::after {
-  width: 66%;
-  background: var(--warning);
-}
-
-.strength-bar.strong::after {
-  width: 100%;
-  background: var(--success);
-}
-
-.strength-text {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* ===== OPCIONES DEL FORMULARIO ===== */
 .form-options {
   display: flex;
   align-items: center;
@@ -583,7 +494,6 @@ const handleKeydown = (e) => {
   gap: 12px;
 }
 
-/* ===== CHECKBOX PERSONALIZADO ===== */
 .checkbox-wrapper {
   display: flex;
   align-items: center;
@@ -591,7 +501,7 @@ const handleKeydown = (e) => {
   cursor: pointer;
   user-select: none;
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .checkbox-wrapper input {
@@ -603,28 +513,21 @@ const handleKeydown = (e) => {
 .checkmark {
   width: 20px;
   height: 20px;
-  border: 2px solid var(--border);
+  border: 2px solid var(--color-border);
   border-radius: 6px;
   display: grid;
   place-items: center;
-  transition: var(--transition);
+  transition: var(--transition-base);
   flex-shrink: 0;
 }
 
 .checkbox-wrapper:hover .checkmark {
-  border-color: var(--primary-light);
+  border-color: var(--color-primary-light);
 }
 
 .checkbox-wrapper input:checked ~ .checkmark {
-  background: var(--primary);
-  border-color: var(--primary);
-  animation: checkPop 0.2s ease;
-}
-
-@keyframes checkPop {
-  0% { transform: scale(0.8); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .checkmark::after {
@@ -634,7 +537,7 @@ const handleKeydown = (e) => {
   font-weight: bold;
   opacity: 0;
   transform: scale(0);
-  transition: var(--transition);
+  transition: var(--transition-base);
 }
 
 .checkbox-wrapper input:checked ~ .checkmark::after {
@@ -643,33 +546,32 @@ const handleKeydown = (e) => {
 }
 
 .forgot-link {
-  color: var(--primary);
+  color: var(--color-primary-light);
   font-weight: 600;
   text-decoration: none;
   font-size: 13px;
-  transition: var(--transition);
+  transition: var(--transition-base);
   padding: 4px 8px;
   border-radius: 6px;
 }
 
 .forgot-link:hover {
   background: rgba(59, 130, 246, 0.1);
-  color: var(--primary-dark);
+  color: var(--color-primary);
 }
 
-/* ===== BOTÓN PRINCIPAL ===== */
 .primary_btn {
   width: 100%;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
   color: white;
   border: none;
   padding: 14px 20px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
-  transition: var(--transition);
-  box-shadow: 0 12px 24px rgba(59, 130, 246, 0.3);
+  transition: var(--transition-base);
+  box-shadow: var(--shadow-primary);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -678,23 +580,9 @@ const handleKeydown = (e) => {
   gap: 8px;
 }
 
-.primary_btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--primary-dark), #1d4ed8);
-  opacity: 0;
-  transition: var(--transition);
-  z-index: -1;
-}
-
 .primary_btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 16px 32px rgba(59, 130, 246, 0.4);
-}
-
-.primary_btn:hover:not(:disabled)::before {
-  opacity: 1;
+  box-shadow: 0 16px 32px rgba(30, 58, 138, 0.4);
 }
 
 .primary_btn:active:not(:disabled) {
@@ -722,7 +610,6 @@ const handleKeydown = (e) => {
   transform: translateX(4px);
 }
 
-/* ===== LOADER ===== */
 .loader {
   width: 24px;
   height: 24px;
@@ -736,11 +623,10 @@ const handleKeydown = (e) => {
   to { transform: rotate(360deg); }
 }
 
-/* ===== MENSAJES ===== */
 .message {
   margin-top: 16px;
   padding: 12px 16px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   font-size: 14px;
   display: flex;
   align-items: center;
@@ -771,12 +657,6 @@ const handleKeydown = (e) => {
   border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
-.message-icon {
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-/* ===== TRANSICIONES VUE ===== */
 .fade-slide-enter-active,
 .fade-slide-leave-active {
   transition: all 0.3s ease;
@@ -788,7 +668,6 @@ const handleKeydown = (e) => {
   transform: translateY(-10px);
 }
 
-/* ===== LINKS ===== */
 .links-container {
   display: flex;
   flex-direction: column;
@@ -804,70 +683,70 @@ const handleKeydown = (e) => {
   font-size: 14px;
   font-weight: 500;
   padding: 10px 20px;
-  border-radius: 10px;
-  transition: var(--transition);
+  border-radius: var(--radius-md);
+  transition: var(--transition-base);
   width: 100%;
   text-align: center;
 }
 
 .link.primary {
-  color: var(--primary);
+  color: var(--color-primary-light);
   background: rgba(59, 130, 246, 0.08);
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .link.primary:hover {
   background: rgba(59, 130, 246, 0.15);
-  color: var(--primary-dark);
+  color: var(--color-primary);
   transform: translateY(-1px);
 }
 
 .link.secondary {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   background: transparent;
 }
 
 .link.secondary:hover {
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   background: rgba(148, 163, 184, 0.1);
 }
 
-/* ===== FOOTER ===== */
 .login-footer {
   margin-top: 24px;
-  text-align: center;
-  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--color-text-muted);
   font-size: 12px;
   padding: 12px;
   background: rgba(255, 255, 255, 0.5);
-  border-radius: 10px;
-  backdrop-filter: blur(10px);
+  border-radius: var(--radius-md);
   max-width: 440px;
   width: 100%;
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .login-container {
     padding: 16px;
   }
-  
+
   .card {
     padding: 24px 20px;
-    border-radius: 20px;
+    border-radius: var(--radius-xl);
   }
-  
+
   .card_header {
     flex-direction: column;
     text-align: center;
     padding-bottom: 16px;
   }
-  
+
   .form-options {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .forgot-link {
     align-self: flex-end;
   }
@@ -876,82 +755,51 @@ const handleKeydown = (e) => {
 @media (max-width: 480px) {
   .card {
     padding: 20px 16px;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
   }
-  
+
   .card_header h2 {
     font-size: 22px;
   }
-  
+
   .input_wrap input,
   .primary_btn {
     font-size: 14px;
     padding: 13px 14px;
   }
-  
+
   .form-options {
     gap: 8px;
   }
-  
+
   .checkbox-wrapper {
     font-size: 13px;
   }
 }
 
-/* ===== DARK MODE (opcional) ===== */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --bg-primary: #1e293b;
-    --bg-secondary: #334155;
-    --border: #475569;
-  }
-  
   .login-container {
     background:
       radial-gradient(1200px 600px at 10% -10%, rgba(59, 130, 246, 0.2), transparent 60%),
       radial-gradient(800px 400px at 90% 10%, rgba(139, 92, 241, 0.15), transparent 50%),
       linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
   }
-  
+
   .card {
     background: rgba(30, 41, 59, 0.95);
     border-color: rgba(71, 85, 105, 0.9);
   }
-  
+
   .input_wrap {
-    background: var(--bg-secondary);
+    background: var(--color-bg-secondary);
   }
-  
+
   .input_wrap:focus-within {
     background: #1e293b;
   }
-  
+
   .login-footer {
     background: rgba(30, 41, 59, 0.7);
   }
-}
-
-/* ===== ACCESIBILIDAD ===== */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Focus visible para navegación con teclado */
-:focus-visible {
-  outline: 2px solid var(--primary-light);
-  outline-offset: 2px;
-}
-
-.primary_btn:focus-visible {
-  outline-color: white;
 }
 </style>

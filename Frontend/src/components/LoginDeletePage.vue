@@ -2,51 +2,58 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/UseStore";
+import {
+  PhWarning,
+  PhX,
+  PhCheck,
+  PhEnvelope,
+  PhPencilSimple,
+  PhTrash,
+  PhXCircle,
+  PhCheckCircle,
+  PhWarningCircle,
+  PhLockSimple,
+} from "@phosphor-icons/vue";
 
-document.title = "Eliminar Cuenta | Tu Aplicación";
+document.title = "Eliminar Cuenta | School Login";
 
 const router = useRouter();
 const store = useUserStore();
 
-// Estados del formulario
 const email = ref("");
 const reason = ref("");
-const passwordConfirm = ref(""); // 🔐 Confirmación adicional
+const passwordConfirm = ref("");
 const loading = ref(false);
 const error = ref("");
 const success = ref("");
 const showConfirmModal = ref(false);
 
-// Validaciones en tiempo real
 const isEmailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()));
 const isReasonValid = computed(() => reason.value.trim().length >= 10);
 const isFormValid = computed(() => isEmailValid.value && isReasonValid.value);
 
-// Previsualización del motivo (caracteres restantes)
 const reasonRemaining = computed(() => 200 - reason.value.length);
 const isReasonTooLong = computed(() => reason.value.length > 200);
 
-// Manejo de eliminación con confirmación
 function handleDeleteRequest() {
   error.value = "";
-  
+
   if (!isEmailValid.value) {
     error.value = "Por favor ingresa un correo electrónico válido";
     return;
   }
-  
+
   if (!isReasonValid.value) {
     error.value = "El motivo debe tener al menos 10 caracteres";
     return;
   }
-  
-  // Mostrar modal de confirmación para acción destructiva
+
   showConfirmModal.value = true;
 }
 
 async function confirmDelete() {
   if (loading.value) return;
-  
+
   error.value = "";
   success.value = "";
   loading.value = true;
@@ -56,24 +63,21 @@ async function confirmDelete() {
     const data = await store.deleteUser({
       email: email.value.trim().toLowerCase(),
       reason: reason.value.trim(),
-      // passwordConfirm: passwordConfirm.value // Descomentar si tu backend lo requiere
     });
-    
-    success.value = data?.message || "✅ Usuario eliminado exitosamente";
-    
-    // Limpiar formulario y redirigir después de éxito
+
+    success.value = data?.message || "Usuario eliminado exitosamente";
+
     setTimeout(() => {
       email.value = "";
       reason.value = "";
       passwordConfirm.value = "";
       router.push("/login");
     }, 2000);
-    
   } catch (err) {
     console.error("Delete error:", err);
-    error.value = err?.response?.data?.message 
-      || err?.message 
-      || "❌ No se pudo eliminar el usuario. Verifica los datos e intenta nuevamente.";
+    error.value = err?.response?.data?.message
+      || err?.message
+      || "No se pudo eliminar el usuario. Verifica los datos e intenta nuevamente.";
   } finally {
     loading.value = false;
   }
@@ -88,7 +92,6 @@ function goToLogin() {
   router.push("/login");
 }
 
-// Permitir submit con Enter (solo en campos de texto, no en textarea)
 const handleKeydown = (e) => {
   if (e.key === "Enter" && !e.shiftKey && e.target.tagName !== "TEXTAREA") {
     e.preventDefault();
@@ -96,39 +99,42 @@ const handleKeydown = (e) => {
   }
 };
 
-// Cerrar modal con Escape
 const handleModalKeydown = (e) => {
   if (e.key === "Escape") cancelDelete();
 };
 </script>
+
 <template>
   <section class="delete-page">
-    <!-- Efectos de fondo -->
     <div class="ambient ambient-1"></div>
     <div class="ambient ambient-2"></div>
     <div class="grid-pattern"></div>
 
-    <form 
-      class="delete-card" 
+    <form
+      class="delete-card"
       @submit.prevent="handleDeleteRequest"
       @keydown="handleKeydown"
       aria-labelledby="delete-title"
     >
-      <!-- Header con advertencia visual -->
       <header class="delete-header">
-        <div class="header-icon warning" aria-hidden="true">⚠️</div>
+        <div class="header-icon warning">
+          <PhWarning :size="24" weight="fill" />
+        </div>
         <div>
           <h1 id="delete-title">Eliminar cuenta</h1>
           <p>Esta acción es <strong>irreversible</strong>. Asegúrate de tener una copia de seguridad.</p>
         </div>
       </header>
 
-      <!-- Campo Email -->
       <div class="form-group" :class="{ 'error-state': error && !isEmailValid }">
         <label for="email">
           <span>Correo electrónico</span>
-          <span v-if="email && !isEmailValid" class="validation-badge error" aria-hidden="true">✕</span>
-          <span v-else-if="isEmailValid" class="validation-badge success" aria-hidden="true">✓</span>
+          <span v-if="email && !isEmailValid" class="validation-badge error">
+            <PhX :size="11" weight="bold" />
+          </span>
+          <span v-else-if="isEmailValid" class="validation-badge success">
+            <PhCheck :size="11" weight="bold" />
+          </span>
         </label>
         <div class="input-wrapper">
           <input
@@ -142,16 +148,19 @@ const handleModalKeydown = (e) => {
             aria-required="true"
             aria-describedby="email-hint"
           />
-          <span class="input-icon" aria-hidden="true">📧</span>
+          <span class="input-icon">
+            <PhEnvelope :size="16" />
+          </span>
         </div>
         <small id="email-hint" class="hint">Ingresa el correo de la cuenta a eliminar</small>
       </div>
 
-      <!-- Campo Motivo (textarea para mejor UX) -->
       <div class="form-group" :class="{ 'error-state': error && !isReasonValid }">
         <label for="reason">
-          <span>Motivo de eliminación <span class="optional">(opcional)</span></span>
-          <span v-if="isReasonTooLong" class="validation-badge error" aria-hidden="true">⚠️</span>
+          <span>Motivo de eliminación</span>
+          <span v-if="isReasonTooLong" class="validation-badge error">
+            <Warning :size="11" weight="fill" />
+          </span>
         </label>
         <div class="input-wrapper textarea-wrapper">
           <textarea
@@ -163,74 +172,72 @@ const handleModalKeydown = (e) => {
             :class="{ 'invalid': isReasonTooLong }"
             aria-describedby="reason-counter"
           ></textarea>
-          <span class="input-icon textarea-icon" aria-hidden="true">✏️</span>
+          <span class="input-icon textarea-icon">
+            <PhPencilSimple :size="16" />
+          </span>
         </div>
         <small id="reason-counter" class="hint counter" :class="{ 'warning': reasonRemaining < 30 }">
           {{ reasonRemaining }} caracteres restantes
         </small>
       </div>
 
-      <!-- Campo de confirmación (opcional, para mayor seguridad) -->
       <div class="form-group security-check">
         <label class="checkbox-label">
-          <input 
-            type="checkbox" 
-            v-model="passwordConfirm" 
+          <input
+            type="checkbox"
+            v-model="passwordConfirm"
             true-value="confirmar"
             false-value=""
             class="custom-checkbox"
           />
-          <span class="checkmark" aria-hidden="true"></span>
+          <span class="checkmark"></span>
           <span>Confirmo que deseo eliminar permanentemente esta cuenta</span>
         </label>
       </div>
 
-      <!-- Botones de acción -->
       <div class="actions">
-        <button 
-          type="button" 
-          class="btn ghost" 
+        <button
+          type="button"
+          class="btn ghost"
           @click="goToLogin"
           :disabled="loading"
         >
           ← Cancelar
         </button>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           class="btn danger"
           :disabled="loading || !isFormValid || passwordConfirm !== 'confirmar'"
           :class="{ 'loading': loading, 'shake': error }"
         >
           <span v-if="!loading" class="btn-content">
-            <span class="btn-icon" aria-hidden="true">🗑️</span>
+            <PhTrash :size="16" />
             Eliminar cuenta
           </span>
-          <span v-else class="loader" aria-hidden="true"></span>
+          <span v-else class="loader"></span>
         </button>
       </div>
 
-      <!-- Mensajes de estado -->
       <transition name="fade-slide">
         <p v-if="error" class="message error" role="alert">
-          <span class="message-icon" aria-hidden="true">❌</span>
+          <PhXCircle :size="16" weight="fill" />
           {{ error }}
         </p>
       </transition>
       <transition name="fade-slide">
         <output v-if="success" class="message success" aria-live="polite">
-          <span class="message-icon" aria-hidden="true">✅</span>
+          <PhCheckCircle :size="16" weight="fill" />
           {{ success }}
         </output>
       </transition>
     </form>
 
-    <!-- 🔴 MODAL DE CONFIRMACIÓN (Overlay) -->
     <Teleport to="body">
       <transition name="modal">
-        <dialog 
-          v-if="showConfirmModal" 
+        <dialog
+          v-if="showConfirmModal"
           open
-          class="modal-overlay" 
+          class="modal-overlay"
           @click.self="cancelDelete"
           @keydown="handleModalKeydown"
           aria-modal="true"
@@ -238,39 +245,42 @@ const handleModalKeydown = (e) => {
           tabindex="-1"
         >
           <div class="modal-card">
-            <div class="modal-icon critical" aria-hidden="true">🚨</div>
-            
+            <div class="modal-icon critical">
+              <PhWarningCircle :size="32" weight="fill" />
+            </div>
+
             <h2 id="confirm-title">¿Estás completamente seguro?</h2>
             <p class="modal-description">
               Estás a punto de eliminar la cuenta:
             </p>
-            
+
             <div class="confirmation-detail">
               <span class="detail-label">Correo:</span>
               <span class="detail-value">{{ email }}</span>
             </div>
-            
+
             <div v-if="reason" class="confirmation-detail">
               <span class="detail-label">Motivo:</span>
               <span class="detail-value">{{ reason }}</span>
             </div>
-            
+
             <p class="modal-warning">
-              ⚠️ Esta acción <strong>no se puede deshacer</strong>. Todos los datos asociados serán eliminados permanentemente.
+              <PhWarning :size="14" weight="fill" />
+              Esta acción <strong>no se puede deshacer</strong>. Todos los datos asociados serán eliminados permanentemente.
             </p>
-            
+
             <div class="modal-actions">
-              <button 
-                type="button" 
-                class="btn ghost" 
+              <button
+                type="button"
+                class="btn ghost"
                 @click="cancelDelete"
                 :disabled="loading"
               >
                 No, volver atrás
               </button>
-              <button 
-                type="button" 
-                class="btn danger critical" 
+              <button
+                type="button"
+                class="btn danger critical"
                 @click="confirmDelete"
                 :disabled="loading"
               >
@@ -283,37 +293,15 @@ const handleModalKeydown = (e) => {
       </transition>
     </Teleport>
 
-    <!-- Footer informativo -->
     <footer class="delete-footer">
-      <p>🔒 Tu solicitud será procesada de forma segura. <RouterLink to="/help" class="footer-link">¿Necesitas ayuda?</RouterLink></p>
+      <PhLockSimple :size="14" weight="bold" />
+      <span>Tu solicitud será procesada de forma segura.</span>
+      <RouterLink to="/help" class="footer-link">¿Necesitas ayuda?</RouterLink>
     </footer>
   </section>
 </template>
-<style scoped>
-/* ===== VARIABLES CSS ===== */
-:root {
-  --danger: #ef4444;
-  --danger-dark: #dc2626;
-  --danger-light: #f87171;
-  --warning: #f59e0b;
-  --success: #10b981;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-tertiary: #f1f5f9;
-  --border: #e2e8f0;
-  --border-focus: #06b6d4;
-  --shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 10px 25px -5px rgb(0 0 0 / 0.15);
-  --shadow-lg: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-  --shadow-critical: 0 0 0 4px rgba(239, 68, 68, 0.2);
-  --radius: 16px;
-  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
-/* ===== PÁGINA PRINCIPAL ===== */
+<style scoped>
 .delete-page {
   min-height: 100vh;
   display: grid;
@@ -327,7 +315,6 @@ const handleModalKeydown = (e) => {
   overflow: hidden;
 }
 
-/* ===== EFECTOS DE FONDO ===== */
 .ambient {
   position: absolute;
   border-radius: 50%;
@@ -362,11 +349,10 @@ const handleModalKeydown = (e) => {
   66% { transform: translate(-10px, 10px) scale(0.97); }
 }
 
-/* Patrón de grid sutil */
 .grid-pattern {
   position: absolute;
   inset: 0;
-  background-image: 
+  background-image:
     linear-gradient(rgba(14, 165, 233, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(14, 165, 233, 0.03) 1px, transparent 1px);
   background-size: 40px 40px;
@@ -374,15 +360,16 @@ const handleModalKeydown = (e) => {
   z-index: 0;
 }
 
-/* ===== TARJETA PRINCIPAL ===== */
 .delete-card {
   width: 100%;
   max-width: 520px;
   padding: 32px;
-  border-radius: var(--radius);
+  border-radius: var(--radius-xl);
   background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  box-shadow: var(--shadow-lg);
+  border: 3px solid var(--color-border);
+  box-shadow:
+    inset -2px -2px 8px rgba(0, 0, 0, 0.04),
+    var(--shadow-lg);
   display: grid;
   gap: 16px;
   position: relative;
@@ -401,22 +388,20 @@ const handleModalKeydown = (e) => {
   }
 }
 
-/* ===== HEADER CON ADVERTENCIA ===== */
 .delete-header {
   display: flex;
   align-items: flex-start;
   gap: 14px;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .header-icon {
   width: 48px;
   height: 48px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   display: grid;
   place-items: center;
-  font-size: 24px;
   flex-shrink: 0;
   animation: pulseWarning 2s ease-in-out infinite;
 }
@@ -436,23 +421,22 @@ const handleModalKeydown = (e) => {
   margin: 0 0 6px;
   font-size: 24px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   letter-spacing: -0.02em;
 }
 
 .delete-header p {
   margin: 0;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 1.5;
 }
 
 .delete-header strong {
-  color: var(--danger);
+  color: var(--color-destructive);
   font-weight: 600;
 }
 
-/* ===== GRUPOS DE FORMULARIO ===== */
 .form-group {
   display: grid;
   gap: 8px;
@@ -464,14 +448,8 @@ const handleModalKeydown = (e) => {
   justify-content: space-between;
   font-weight: 600;
   font-size: 13px;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   letter-spacing: 0.01em;
-}
-
-.label .optional {
-  font-weight: 400;
-  color: var(--text-muted);
-  font-size: 12px;
 }
 
 .validation-badge {
@@ -492,16 +470,15 @@ const handleModalKeydown = (e) => {
 }
 
 .validation-badge.success {
-  background: var(--success);
+  background: var(--color-success);
   color: white;
 }
 
 .validation-badge.error {
-  background: var(--danger);
+  background: var(--color-destructive);
   color: white;
 }
 
-/* ===== INPUTS ===== */
 .input-wrapper {
   position: relative;
   display: flex;
@@ -512,13 +489,13 @@ const handleModalKeydown = (e) => {
 .input-wrapper textarea {
   width: 100%;
   padding: 14px 40px 14px 16px;
-  border: 2px solid var(--border);
-  border-radius: 12px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: 15px;
   font-family: inherit;
-  color: var(--text-primary);
-  background: var(--bg-secondary);
-  transition: var(--transition);
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  transition: var(--transition-base);
   resize: vertical;
   min-height: 48px;
 }
@@ -526,19 +503,19 @@ const handleModalKeydown = (e) => {
 .input-wrapper input:focus,
 .input-wrapper textarea:focus {
   outline: none;
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15);
-  background: var(--bg-primary);
+  border-color: var(--color-primary-light);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  background: var(--color-bg-primary);
 }
 
 .input-wrapper input.valid {
-  border-color: var(--success);
+  border-color: var(--color-success);
   background: rgba(16, 185, 129, 0.05);
 }
 
 .input-wrapper input.invalid,
 .input-wrapper textarea.invalid {
-  border-color: var(--danger);
+  border-color: var(--color-destructive);
   animation: shake 0.4s ease;
   background: rgba(239, 68, 68, 0.05);
 }
@@ -554,8 +531,7 @@ const handleModalKeydown = (e) => {
   right: 14px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 16px;
-  color: var(--text-muted);
+  color: var(--color-text-muted);
   pointer-events: none;
   user-select: none;
 }
@@ -573,7 +549,7 @@ const handleModalKeydown = (e) => {
 
 .hint {
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--color-text-muted);
   margin-left: 4px;
 }
 
@@ -582,11 +558,10 @@ const handleModalKeydown = (e) => {
 }
 
 .hint.counter.warning {
-  color: var(--warning);
+  color: var(--color-warning);
   font-weight: 500;
 }
 
-/* ===== CHECKBOX PERSONALIZADO ===== */
 .security-check {
   margin-top: 4px;
 }
@@ -598,11 +573,11 @@ const handleModalKeydown = (e) => {
   cursor: pointer;
   user-select: none;
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   line-height: 1.4;
   padding: 8px;
-  border-radius: 10px;
-  transition: var(--transition);
+  border-radius: var(--radius-md);
+  transition: var(--transition-base);
 }
 
 .checkbox-label:hover {
@@ -619,28 +594,21 @@ const handleModalKeydown = (e) => {
   width: 22px;
   height: 22px;
   min-width: 22px;
-  border: 2px solid var(--border);
+  border: 2px solid var(--color-border);
   border-radius: 6px;
   display: grid;
   place-items: center;
-  transition: var(--transition);
+  transition: var(--transition-base);
   margin-top: 2px;
 }
 
 .checkbox-label:hover .checkmark {
-  border-color: var(--danger-light);
+  border-color: var(--color-destructive);
 }
 
 .checkbox-label input:checked ~ .checkmark {
-  background: var(--danger);
-  border-color: var(--danger);
-  animation: checkPop 0.25s ease;
-}
-
-@keyframes checkPop {
-  0% { transform: scale(0.8); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); }
+  background: var(--color-destructive);
+  border-color: var(--color-destructive);
 }
 
 .checkmark::after {
@@ -650,7 +618,7 @@ const handleModalKeydown = (e) => {
   font-weight: bold;
   opacity: 0;
   transform: scale(0);
-  transition: var(--transition);
+  transition: var(--transition-base);
 }
 
 .checkbox-label input:checked ~ .checkmark::after {
@@ -658,7 +626,6 @@ const handleModalKeydown = (e) => {
   transform: scale(1);
 }
 
-/* ===== BOTONES ===== */
 .actions {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
@@ -668,12 +635,12 @@ const handleModalKeydown = (e) => {
 
 .btn {
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 14px 20px;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  transition: var(--transition);
+  transition: var(--transition-base);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -688,24 +655,22 @@ const handleModalKeydown = (e) => {
   transform: none !important;
 }
 
-/* Botón Ghost */
 .btn.ghost {
   background: transparent;
-  color: var(--text-secondary);
-  border: 2px solid var(--border);
+  color: var(--color-text-secondary);
+  border: 2px solid var(--color-border);
 }
 
 .btn.ghost:hover:not(:disabled) {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  border-color: var(--text-muted);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border-color: var(--color-text-muted);
 }
 
-/* Botón Danger */
 .btn.danger {
-  background: linear-gradient(135deg, var(--danger), var(--danger-dark));
+  background: linear-gradient(135deg, var(--color-destructive), var(--color-destructive-dark));
   color: white;
-  box-shadow: 0 10px 25px rgba(239, 68, 68, 0.35);
+  box-shadow: var(--shadow-destructive);
 }
 
 .btn.danger:hover:not(:disabled) {
@@ -727,15 +692,10 @@ const handleModalKeydown = (e) => {
   box-shadow: 0 14px 32px rgba(185, 28, 28, 0.55);
 }
 
-.btn-icon {
-  font-size: 16px;
-}
-
 .btn.shake {
   animation: shake 0.4s ease;
 }
 
-/* Loader */
 .loader {
   width: 20px;
   height: 20px;
@@ -755,11 +715,10 @@ const handleModalKeydown = (e) => {
   to { transform: rotate(360deg); }
 }
 
-/* ===== MENSAJES ===== */
 .message {
   margin: 0;
   padding: 12px 16px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   font-size: 14px;
   display: flex;
   align-items: center;
@@ -784,12 +743,6 @@ const handleModalKeydown = (e) => {
   border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
-.message-icon {
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-/* ===== TRANSICIONES VUE ===== */
 .fade-slide-enter-active,
 .fade-slide-leave-active {
   transition: all 0.25s ease;
@@ -801,7 +754,6 @@ const handleModalKeydown = (e) => {
   transform: translateY(-8px);
 }
 
-/* ===== MODAL DE CONFIRMACIÓN ===== */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -820,13 +772,13 @@ const handleModalKeydown = (e) => {
 }
 
 .modal-card {
-  background: var(--bg-primary);
-  border-radius: 20px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-xl);
   padding: 28px;
   max-width: 480px;
   width: 100%;
   box-shadow: var(--shadow-lg);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 3px solid rgba(239, 68, 68, 0.2);
   animation: modalSlideUp 0.3s ease;
   text-align: center;
 }
@@ -849,7 +801,6 @@ const handleModalKeydown = (e) => {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 32px;
   animation: bounce 0.5s ease;
 }
 
@@ -868,12 +819,12 @@ const handleModalKeydown = (e) => {
   margin: 0 0 12px;
   font-size: 22px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
 }
 
 .modal-description {
   margin: 0 0 16px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font-size: 15px;
 }
 
@@ -881,8 +832,8 @@ const handleModalKeydown = (e) => {
   display: flex;
   gap: 8px;
   padding: 12px 16px;
-  background: var(--bg-secondary);
-  border-radius: 10px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
   margin-bottom: 12px;
   text-align: left;
   font-size: 14px;
@@ -890,12 +841,12 @@ const handleModalKeydown = (e) => {
 
 .detail-label {
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   min-width: 70px;
 }
 
 .detail-value {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   word-break: break-all;
 }
 
@@ -904,10 +855,13 @@ const handleModalKeydown = (e) => {
   padding: 14px 16px;
   background: rgba(239, 68, 68, 0.08);
   border: 1px dashed rgba(239, 68, 68, 0.3);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   color: #991b1b;
   font-size: 13px;
   line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .modal-warning strong {
@@ -921,33 +875,33 @@ const handleModalKeydown = (e) => {
   margin-top: 8px;
 }
 
-/* ===== FOOTER ===== */
 .delete-footer {
   margin-top: 24px;
-  text-align: center;
-  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--color-text-muted);
   font-size: 13px;
   padding: 12px 20px;
   background: rgba(255, 255, 255, 0.6);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
+  border-radius: var(--radius-md);
   max-width: 520px;
   width: 100%;
 }
 
 .footer-link {
-  color: var(--border-focus);
+  color: var(--color-primary-light);
   text-decoration: none;
   font-weight: 500;
-  transition: var(--transition);
+  transition: var(--transition-base);
 }
 
 .footer-link:hover {
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   text-decoration: underline;
 }
 
-/* ===== TRANSICIÓN MODAL VUE ===== */
 .modal-enter-active,
 .modal-leave-active {
   transition: all 0.25s ease;
@@ -963,32 +917,31 @@ const handleModalKeydown = (e) => {
   transform: translateY(20px) scale(0.98);
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 640px) {
   .delete-page {
     padding: 16px;
   }
-  
+
   .delete-card {
     padding: 24px 20px;
-    border-radius: 20px;
+    border-radius: var(--radius-xl);
   }
-  
+
   .delete-header {
     flex-direction: column;
     text-align: center;
     align-items: center;
   }
-  
+
   .actions,
   .modal-actions {
     grid-template-columns: 1fr;
   }
-  
+
   .btn.ghost {
     order: 2;
   }
-  
+
   .btn.danger {
     order: 1;
   }
@@ -998,87 +951,54 @@ const handleModalKeydown = (e) => {
   .delete-card {
     padding: 20px 16px;
   }
-  
+
   .delete-header h1 {
     font-size: 22px;
   }
-  
+
   .input-wrapper input,
   .input-wrapper textarea,
   .btn {
     font-size: 14px;
     padding: 13px 36px 13px 14px;
   }
-  
+
   .modal-card {
     padding: 24px 20px;
   }
 }
 
-/* ===== DARK MODE ===== */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --bg-primary: #1e293b;
-    --bg-secondary: #334155;
-    --bg-tertiary: #475569;
-    --border: #475569;
-    --border-focus: #22d3ee;
-  }
-  
   .delete-page {
     background:
       radial-gradient(1000px 500px at 100% 0%, rgba(14, 165, 233, 0.15), transparent 60%),
       radial-gradient(600px 300px at 0% 100%, rgba(239, 68, 68, 0.12), transparent 50%),
       linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
   }
-  
+
   .delete-card {
     background: rgba(30, 41, 59, 0.96);
     border-color: rgba(71, 85, 105, 0.95);
   }
-  
+
   .grid-pattern {
-    background-image: 
+    background-image:
       linear-gradient(rgba(14, 165, 233, 0.06) 1px, transparent 1px),
       linear-gradient(90deg, rgba(14, 165, 233, 0.06) 1px, transparent 1px);
   }
-  
+
   .modal-card {
-    background: var(--bg-primary);
+    background: var(--color-bg-primary);
     border-color: rgba(239, 68, 68, 0.3);
   }
-  
+
   .delete-footer {
     background: rgba(30, 41, 59, 0.7);
   }
 }
 
-/* ===== ACCESIBILIDAD ===== */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
-}
-
-.btn.danger:focus-visible {
-  outline-color: white;
-}
-
-/* Estado de error en grupo */
 .form-group.error-state label {
-  color: var(--danger);
+  color: var(--color-destructive);
 }
 
 .form-group.error-state .input-wrapper input {

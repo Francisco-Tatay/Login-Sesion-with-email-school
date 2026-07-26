@@ -1,3 +1,25 @@
+<script setup>
+import { ref } from "vue";
+import { useUserStore } from "@/stores/UseStore";
+document.title = "Register | School Login";
+const email = ref("");
+const password = ref("");
+const loading = ref(false);
+
+const handleRegister = async () => {
+  const userStore = useUserStore();
+  loading.value = true;
+  try {
+    await userStore.addUser({ email: email.value, password: password.value });
+    alert("Registro exitoso");
+  } catch (error) {
+    alert("Error en el registro: " + (error?.message || "desconocido"));
+  } finally {
+    loading.value = false;
+  }
+};
+</script>
+
 <template>
   <div class="register_container">
     <div class="bg_blur"></div>
@@ -42,32 +64,10 @@
         <RouterLink class="link_login" to="/login">¿Ya tienes cuenta? Inicia sesión</RouterLink>
       </form>
 
-      <RouterLink to="/" class="go_home">Ver las 3 opciones principales</RouterLink>
+      <RouterLink to="/" class="go_home">Ver las opciones principales</RouterLink>
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref } from "vue";
-import { useUserStore } from "@/stores/UseStore";
-document.title = "Register";
-const email = ref("");
-const password = ref("");
-const loading = ref(false);
-
-const handleRegister = async () => {
-  const userStore = useUserStore();
-  loading.value = true;
-  try {
-    await userStore.addUser({ email: email.value, password: password.value });
-    alert("Registro exitoso");
-  } catch (error) {
-    alert("Error en el registro: " + (error?.message || "desconocido"));
-  } finally {
-    loading.value = false;
-  }
-};
-</script>
 
 <style scoped>
 .register_container {
@@ -97,13 +97,12 @@ const handleRegister = async () => {
   width: 100%;
   max-width: 460px;
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  border-radius: 18px;
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-xl);
   padding: 28px;
   box-shadow:
-    0 20px 50px rgba(15, 23, 42, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(8px);
+    inset -2px -2px 8px rgba(0, 0, 0, 0.04),
+    0 20px 50px rgba(15, 23, 42, 0.08);
   animation: fadeUp 0.35s ease;
 }
 
@@ -117,21 +116,21 @@ const handleRegister = async () => {
 .logo_dot {
   width: 44px;
   height: 44px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
-  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  box-shadow: var(--shadow-primary);
 }
 
 h2 {
   margin: 0 0 4px;
   font-size: 24px;
   letter-spacing: -0.2px;
-  color: #0f172a;
+  color: var(--color-text-primary);
 }
 
 p {
   margin: 0;
-  color: #64748b;
+  color: var(--color-text-secondary);
   font-size: 14px;
 }
 
@@ -144,17 +143,15 @@ form {
   display: grid;
   gap: 8px;
   font-size: 13px;
-  color: #475569;
+  color: var(--color-text-secondary);
 }
 
 .input_wrap {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 2px;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
+  transition: var(--transition-base);
 }
 
 input {
@@ -163,36 +160,34 @@ input {
   border: none;
   background: transparent;
   outline: none;
-  color: #0f172a;
+  color: var(--color-text-primary);
   font-size: 14px;
 }
 
 .input_wrap:focus-within {
-  border-color: #60a5fa;
+  border-color: var(--color-primary-light);
   box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
 }
 
 .primary_btn {
   margin-top: 6px;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
   color: white;
   border: none;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-weight: 600;
   cursor: pointer;
-  transition:
-    transform 0.05s,
-    box-shadow 0.2s,
-    filter 0.2s;
-  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
+  transition: var(--transition-base);
+  box-shadow: var(--shadow-primary);
 }
 
-.primary_btn:hover {
-  filter: brightness(1.03);
+.primary_btn:hover:not(:disabled) {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
 }
 
-.primary_btn:active {
+.primary_btn:active:not(:disabled) {
   transform: translateY(1px);
 }
 
@@ -205,7 +200,7 @@ input {
 .divider {
   display: grid;
   place-items: center;
-  color: #94a3b8;
+  color: var(--color-text-muted);
   font-size: 12px;
   position: relative;
   margin: 6px 0;
@@ -215,7 +210,7 @@ input {
 .divider::after {
   content: "";
   height: 1px;
-  background: #e2e8f0;
+  background: var(--color-border);
   width: 40%;
   position: absolute;
   top: 50%;
@@ -231,7 +226,7 @@ input {
 
 .link_login {
   text-align: center;
-  color: #2563eb;
+  color: var(--color-primary-light);
   font-weight: 600;
   text-decoration: none;
 }
@@ -244,7 +239,7 @@ input {
   display: block;
   text-align: center;
   margin-top: 12px;
-  color: #475569;
+  color: var(--color-text-secondary);
   font-size: 13px;
   text-decoration: none;
 }
@@ -282,7 +277,7 @@ input {
 
   .card {
     padding: 20px;
-    border-radius: 14px;
+    border-radius: var(--radius-lg);
   }
 
   h2 {
@@ -292,6 +287,24 @@ input {
   input,
   .primary_btn {
     font-size: 13px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .register_container {
+    background:
+      radial-gradient(900px 400px at 10% -10%, rgba(59, 130, 246, 0.2), transparent 60%),
+      radial-gradient(700px 300px at 110% 0%, rgba(99, 102, 241, 0.18), transparent 60%),
+      linear-gradient(135deg, #0f172a, #1e293b);
+  }
+
+  .card {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: rgba(71, 85, 105, 0.9);
+  }
+
+  .input_wrap {
+    background: var(--color-bg-secondary);
   }
 }
 </style>

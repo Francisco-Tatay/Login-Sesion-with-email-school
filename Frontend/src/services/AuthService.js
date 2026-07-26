@@ -1,1 +1,2 @@
-import http from 'http2';
+// Stub — use userService.js instead
+export {};

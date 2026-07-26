@@ -15,17 +15,17 @@ const options = [
     badge: "Nuevo",
   },
   {
-    title: "login-delete",
-    description: "Prueba visual del flujo de baja antes de conectar store/composables.",
+    title: "Eliminar cuenta",
+    description: "Solicita la eliminacion permanente de tu cuenta.",
     to: "/login/delete",
-    badge: "Testing",
+    badge: "Gestion",
   },
   {
-    title:"Dashboard",
-    description:"Vista previa del dashboard, sin proteccion de rutas ni datos reales.",
-    to:"/dashboard",
-    badge:"Dashboard"
-  }
+    title: "Dashboard",
+    description: "Panel de administracion de usuarios.",
+    to: "/dashboard",
+    badge: "Dashboard",
+  },
 ];
 </script>
 
@@ -37,7 +37,7 @@ const options = [
     <section class="hero">
       <p class="eyebrow">Portal de usuario</p>
       <h1>Elige una accion para comenzar</h1>
-      <p class="subtitle">Desde aqui tienes las 3 opciones principales al abrir la aplicacion.</p>
+      <p class="subtitle">Desde aqui tienes las opciones principales al abrir la aplicacion.</p>
     </section>
 
     <section class="option-grid">
@@ -128,14 +128,16 @@ h1 {
 
 .option-card {
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(148, 163, 184, 0.26);
-  border-radius: 18px;
+  border: 3px solid rgba(148, 163, 184, 0.26);
+  border-radius: var(--radius-xl);
   padding: 20px;
   text-decoration: none;
   color: inherit;
   display: grid;
   gap: 8px;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+  box-shadow:
+    inset -2px -2px 8px rgba(0, 0, 0, 0.04),
+    0 14px 34px rgba(15, 23, 42, 0.08);
   transition:
     transform 0.18s ease,
     box-shadow 0.18s ease,
@@ -143,9 +145,11 @@ h1 {
 }
 
 .option-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
   border-color: rgba(37, 99, 235, 0.44);
-  box-shadow: 0 20px 42px rgba(37, 99, 235, 0.18);
+  box-shadow:
+    inset -2px -2px 8px rgba(0, 0, 0, 0.04),
+    0 20px 42px rgba(37, 99, 235, 0.18);
 }
 
 .badge {
@@ -196,6 +200,40 @@ h2 {
 
   .option-card {
     padding: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .landing-page {
+    background:
+      radial-gradient(900px 480px at -10% -10%, rgba(244, 114, 182, 0.15), transparent 60%),
+      radial-gradient(700px 420px at 110% 10%, rgba(59, 130, 246, 0.18), transparent 55%),
+      linear-gradient(140deg, #1e1b2e, #0f172a 52%, #1e293b);
+  }
+
+  h1 {
+    color: #f1f5f9;
+  }
+
+  .option-card {
+    background: rgba(30, 41, 59, 0.9);
+    border-color: rgba(71, 85, 105, 0.4);
+  }
+
+  .option-card:hover {
+    border-color: rgba(96, 165, 250, 0.5);
+  }
+
+  .option-card p {
+    color: #94a3b8;
+  }
+
+  h2 {
+    color: #f1f5f9;
+  }
+
+  .subtitle {
+    color: #94a3b8;
   }
 }
 </style>
